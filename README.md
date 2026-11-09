@@ -13,5 +13,5 @@ A structured Python CLI application designed to track gym workouts, calculate to
 
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/Koulis1/gym-cli-tracker.git](https://github.com/Koulis1/gym-cli-tracker.git)
-   cd gym-cli-tracker
+git clone [https://github.com/Koulis1/gym-cli-tracker.git](https://github.com/Koulis1/gym-cli-tracker.git)
+cd gym-cli-tracker
