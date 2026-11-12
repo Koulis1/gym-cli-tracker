@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Workout Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #eceff2; --surface: #ffffff; --ink: #14181f; --muted: #5b6673; --line: #d3d9e0;
+  --accent: #1d4ed8; --accent-ink: #ffffff; --bar: #1d4ed8; --bar-bg: #dfe5ee; --danger: #b42318;
+  --pr: #f2b01e;
+  --display: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161c; --surface: #1b212a; --ink: #eef1f5; --muted: #98a3b1; --line: #2e3744;
+    --accent: #6c93ff; --accent-ink: #0c1220; --bar: #6c93ff; --bar-bg: #2a3342; --danger: #ff8b7e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161c; --surface: #1b212a; --ink: #eef1f5; --muted: #98a3b1; --line: #2e3744;
+  --accent: #6c93ff; --accent-ink: #0c1220; --bar: #6c93ff; --bar-bg: #2a3342; --danger: #ff8b7e;
+  color-scheme: dark;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.5 var(--body); }
+main { max-width: 720px; margin: 0 auto; padding: 28px 16px 56px; }
+h1 { font: 700 44px/1 var(--display); letter-spacing: .01em; margin: 0 0 4px; }
+h2 { font: 700 26px/1.1 var(--display); margin: 0 0 14px; }
+.sub { color: var(--muted); margin: 0 0 28px; }
+section { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.grid .wide { grid-column: 1 / -1; }
+label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+input { width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; }
+input:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+button { font: 600 15px var(--body); cursor: pointer; border-radius: 6px; padding: 10px 18px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.link { border: 0; background: none; color: var(--danger); padding: 4px 8px; }
+.preview { color: var(--muted); }
+.msg { min-height: 1.4em; margin: 10px 0 0; font-weight: 500; }
+.msg.error { color: var(--danger); }
+.rank { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.rank li { display: grid; grid-template-columns: 28px 1fr auto; gap: 4px 10px; align-items: baseline; }
+.pos { font: 700 22px var(--display); color: var(--muted); }
+.rank li:first-child .pos { color: var(--pr); }
+.name { font-weight: 600; overflow-wrap: anywhere; }
+.kg { font: 700 22px var(--display); }
+.track { grid-column: 2 / -1; height: 10px; background: var(--bar-bg); border-radius: 5px; overflow: hidden; }
+.fill { height: 100%; background: var(--bar); border-radius: 5px; transition: width .35s ease; }
+.scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-weight: 600; color: var(--muted); }
+td.num, th.num { text-align: right; }
+.empty { color: var(--muted); margin: 0; }
+@media (max-width: 520px) { .grid { grid-template-columns: 1fr 1fr; } h1 { font-size: 38px; } }
+@media (prefers-reduced-motion: reduce) { .fill { transition: none; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Workout Log</h1>
+  <p class="sub">Log your lifts and see which exercise you’ve moved the most weight on.</p>
+
+  <section aria-labelledby="add-h">
+    <h2 id="add-h">Add an entry</h2>
+    <div class="grid">
+      <div class="wide">
+        <label for="exercise">Exercise name</label>
+        <input id="exercise" list="names" autocomplete="off" placeholder="Bench press">
+        <datalist id="names"></datalist>
+      </div>
+      <div><label for="weight">Weight (kg)</label><input id="weight" inputmode="decimal" placeholder="60"></div>
+      <div><label for="sets">Sets</label><input id="sets" inputmode="numeric" placeholder="3"></div>
+      <div><label for="reps">Reps per set</label><input id="reps" inputmode="numeric" placeholder="10"></div>
+    </div>
+    <div class="row">
+      <span class="preview" id="preview">Volume: 0 kg</span>
+      <button class="primary" id="add">Add entry</button>
+    </div>
+    <p class="msg" id="msg" role="status" aria-live="polite"></p>
+  </section>
+
+  <section aria-labelledby="rank-h">
+    <h2 id="rank-h">Ranking by max weight</h2>
+    <ol class="rank" id="rank"></ol>
+  </section>
+
+  <section aria-labelledby="hist-h">
+    <h2 id="hist-h">History</h2>
+    <div class="scroll" id="hist"></div>
+    <div class="row">
+      <button id="export" hidden>Export CSV</button>
+      <button class="link" id="clear" hidden>Delete all entries</button>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  var KEY = "workout-log-v1";
+  var entries = load();
+  var $ = function (id) { return document.getElementById(id); };
+
+  function load() {
+    try { var d = JSON.parse(localStorage.getItem(KEY) || "[]"); return Array.isArray(d) ? d : []; }
+    catch (e) { return []; }
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(entries)); }
+    catch (e) { say("Couldn’t save in this browser. Export a CSV to keep your data.", true); }
+  }
+  function say(text, isError) {
+    var m = $("msg"); m.textContent = text; m.className = "msg" + (isError ? " error" : "");
+  }
+  function num(v) { return parseFloat(String(v).trim().replace(",", ".")); }
+  function fmt(n) { return String(Math.round(n * 100) / 100); }
+  function el(tag, text, cls) {
+    var e = document.createElement(tag);
+    if (text !== undefined) e.textContent = text;
+    if (cls) e.className = cls;
+    return e;
+  }
+
+  function updatePreview() {
+    var w = num($("weight").value), s = parseInt($("sets").value, 10), r = parseInt($("reps").value, 10);
+    $("preview").textContent = "Volume: " + (w >= 0 && s > 0 && r > 0 ? fmt(w * s * r) : "0") + " kg";
+  }
+
+  function add() {
+    var name = $("exercise").value.trim();
+    var w = num($("weight").value), s = parseInt($("sets").value, 10), r = parseInt($("reps").value, 10);
+    if (!name) return say("Enter an exercise name.", true);
+    if (!(w >= 0)) return say("Enter the weight as a number, such as 60 or 62.5.", true);
+    if (!(s > 0)) return say("Sets must be a whole number greater than 0.", true);
+    if (!(r > 0)) return say("Reps must be a whole number greater than 0.", true);
+    var d = new Date(), p = function (n) { return String(n).padStart(2, "0"); };
+    entries.push({
+      id: d.getTime() + "-" + Math.random().toString(36).slice(2, 6),
+      date: d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()),
+      exercise: name, weight: w, sets: s, reps: r, volume: Math.round(w * s * r * 100) / 100
+    });
+    save();
+    say("Saved: " + name + ", " + fmt(w) + " kg, " + s + " × " + r + ".", false);
+    ["weight", "sets", "reps"].forEach(function (id) { $(id).value = ""; });
+    $("exercise").value = ""; $("exercise").focus();
+    updatePreview(); render();
+  }
+
+  function renderRanking() {
+    var best = {};
+    entries.forEach(function (e) {
+      var k = e.exercise.toLowerCase();
+      if (!best[k] || e.weight > best[k].weight) best[k] = { name: e.exercise, weight: e.weight };
+    });
+    var list = Object.keys(best).map(function (k) { return best[k]; });
+    list.sort(function (a, b) { return b.weight - a.weight || a.name.toLowerCase().localeCompare(b.name.toLowerCase()); });
+    var ol = $("rank"); ol.textContent = "";
+    if (!list.length) { var li = el("li", "Nothing here yet. Add your first entry above."); li.style.display = "block"; li.className = "empty"; ol.appendChild(li); return; }
+    var top = list[0].weight || 1;
+    list.forEach(function (item, i) {
+      var li = el("li");
+      li.appendChild(el("span", String(i + 1), "pos"));
+      li.appendChild(el("span", item.name, "name"));
+      li.appendChild(el("span", fmt(item.weight) + " kg", "kg"));
+      var t = el("div", undefined, "track"), f = el("div", undefined, "fill");
+      f.style.width = Math.max(2, (item.weight / top) * 100) + "%";
+      t.appendChild(f); li.appendChild(t); ol.appendChild(li);
+    });
+  }
+
+  function renderHistory() {
+    var box = $("hist"); box.textContent = "";
+    $("clear").hidden = !entries.length;
+    if (!entries.length) { box.appendChild(el("p", "No entries yet.", "empty")); return; }
+    var table = el("table"), thead = el("thead"), hr = el("tr");
+    [["Date"], ["Exercise"], ["Kg", 1], ["Sets", 1], ["Reps", 1], ["Volume", 1], [""]].forEach(function (c) {
+      hr.appendChild(el("th", c[0], c[1] ? "num" : ""));
+    });
+    thead.appendChild(hr); table.appendChild(thead);
+    var tb = el("tbody");
+    entries.slice().reverse().forEach(function (e) {
+      var tr = el("tr");
+      tr.appendChild(el("td", e.date));
+      tr.appendChild(el("td", e.exercise));
+      [fmt(e.weight), e.sets, e.reps, fmt(e.volume)].forEach(function (v) { tr.appendChild(el("td", String(v), "num")); });
+      var td = el("td"), b = el("button", "Delete", "link");
+      b.setAttribute("aria-label", "Delete " + e.exercise + " entry from " + e.date);
+      b.addEventListener("click", function () {
+        entries = entries.filter(function (x) { return x.id !== e.id; });
+        save(); render();
+      });
+      td.appendChild(b); tr.appendChild(td); tb.appendChild(tr);
+    });
+    table.appendChild(tb); box.appendChild(table);
+  }
+
+  function renderNames() {
+    var seen = {}, dl = $("names"); dl.textContent = "";
+    entries.forEach(function (e) {
+      var k = e.exercise.toLowerCase();
+      if (!seen[k]) { seen[k] = 1; var o = document.createElement("option"); o.value = e.exercise; dl.appendChild(o); }
+    });
+  }
+
+  function render() { renderRanking(); renderHistory(); renderNames(); }
+
+  function csvCell(v) {
+    var s = String(v);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function exportCsv(downloads) {
+    var rows = [["Date", "Exercise", "Weight (kg)", "Sets", "Reps", "Volume (kg)"]];
+    entries.forEach(function (e) { rows.push([e.date, e.exercise, e.weight, e.sets, e.reps, e.volume]); });
+    var csv = "\ufeff" + rows.map(function (r) { return r.map(csvCell).join(","); }).join("\r\n") + "\r\n";
+    downloads.save({ filename: "workout.csv", data: csv }).then(
+      function () { say("CSV ready.", false); },
+      function (err) { if (!err || err.code !== "declined") say("Couldn’t export the CSV here.", true); }
+    );
+  }
+
+  $("add").addEventListener("click", add);
+  ["exercise", "weight", "sets", "reps"].forEach(function (id) {
+    $(id).addEventListener("input", updatePreview);
+    $(id).addEventListener("keydown", function (e) { if (e.key === "Enter") add(); });
+  });
+  $("clear").addEventListener("click", function () {
+    if (!window.confirm("Delete all entries? This can’t be undone.")) return;
+    entries = []; save(); say("All entries deleted.", false); render();
+  });
+
+  render();
+
+  // Light up CSV export only when the viewer supports file saving
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("downloads").then(function (dl) {
+      if (!dl) return;
+      var b = $("export"); b.hidden = false;
+      b.addEventListener("click", function () {
+        if (!entries.length) return say("Add an entry before exporting.", true);
+        exportCsv(dl);
+      });
+    }).catch(function () {});
+  }
+})();
+</script>
+</body>
+</html>
