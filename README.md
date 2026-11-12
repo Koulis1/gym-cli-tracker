@@ -1,17 +1,21 @@
-# 🏋️ Gym CLI Tracker
+# 🏋️ Workout Log & AI Coach
 
-A structured Python CLI application designed to track gym workouts, calculate total volume, and analyze personal performance records via CSV data storage.
+A full-stack web application designed to track gym workouts, automatically calculate training volume, rank personal records (PRs), and provide personalized workout programming powered by **Google Gemini AI**. *(Includes the original Python CLI tracker as a legacy tool).*
 
 ## ✨ Features
-- **Workout Logging:** Record exercise name, sets, reps, and weight.
-- **Automated Volume Calculation:** Computes total volume per entry (`Sets * Reps * Weight`).
-- **Personal Records Leaderboard:** Reads historical CSV data and ranks exercises based on the heaviest weight lifted (case-insensitive with tie-breaking).
-- **Robust Validation:** Input checks to handle string cleanups, positive numbers, and float formatting (commas vs dots).
-- **Persistent Storage:** Saves entries automatically in standard UTF-8 `workout.csv` format.
+- **Interactive Web Interface:** Clean, responsive UI with automatic Light/Dark mode support.
+- **Automated Volume & PR Leaderboard:** Computes total volume per entry (`Sets × Reps × Weight`) and dynamically ranks exercises by max weight lifted.
+- **Built-in Gemini AI Coach:** Analyzes your logged workout history to suggest progressive overload routines and answers app navigation questions.
+- **Client-Side Privacy & CSV Export:** Stores workout history locally in the browser (`localStorage`) with one-click export to standard `workout.csv` format.
+- **Legacy CLI Mode:** Original terminal-based Python logger (`main.py`) included.
 
-## 🚀 How to Run
+## 🛠️ Tech Stack
+- **Backend:** Python, FastAPI, Uvicorn, Google GenAI SDK
+- **Frontend:** Vanilla HTML5, CSS3, JavaScript
 
-1. Clone the repository:
+## 🚀 How to Run Locally
+
+1. **Clone the repository:**
    ```bash
-git clone [https://github.com/Koulis1/gym-cli-tracker.git](https://github.com/Koulis1/gym-cli-tracker.git)
-cd gym-cli-tracker
+   git clone [https://github.com/Koulis1/gym-cli-tracker.git](https://github.com/Koulis1/gym-cli-tracker.git)
+   cd gym-cli-tracker
